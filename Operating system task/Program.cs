@@ -38,7 +38,7 @@ namespace Operating_system_task
             }
             Levels[0].Processes.Enqueue(ArrivalList.Dequeue());
             RealTime = Levels[0].Processes.Peek().ArrivalTime;
-            NextarrivalTime = ArrivalList.Peek().ArrivalTime;
+            NextarrivalTime = ArrivalList.Peek().ArrivalTime; 
             while (ActiveTime != TotalTime || FinishedProcess.Count !=n)
             {
 
