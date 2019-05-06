@@ -19,7 +19,6 @@ namespace Operating_system_task
             //initialize process
             int TotalTime = 0,
                 ActiveTime = 0,
-                NextarrivalTime = 0,
                 RealTime = 0;
             Queue<Process> ArrivalList = new Queue<Process>();
             Queue<Process> FinishedProcess = new Queue<Process>();
@@ -33,63 +32,71 @@ namespace Operating_system_task
                 int s = int.Parse(input.Split(' ')[1]);
                 ArrivalList.Enqueue(new Process(i+1,a, s));
                 TotalTime += s;
-                if (i == 0)
-                    NextarrivalTime = a;
             }
-            Levels[0].Processes.Enqueue(ArrivalList.Dequeue());
-            RealTime = Levels[0].Processes.Peek().ArrivalTime;
-            NextarrivalTime = ArrivalList.Peek().ArrivalTime; 
-            while (ActiveTime != TotalTime || FinishedProcess.Count !=n)
+            bool getItem = false;
+            while (ActiveTime != TotalTime)
             {
-
+                getItem = false;
+                if (ArrivalList.Count != 0 && ArrivalList.Peek().ArrivalTime <= RealTime)
+                {
+                    Levels[0].AddProcess(ArrivalList.Dequeue());
+                }
                 for (int i = 0; i < Levels.Count; i++)
                 {
-                    if (Levels[i].Processes.Count != 0)
+                    if (Levels[i].ProcessCount() != 0)
                     {
-                        (int, Process) values = Levels[i].ExecuteTopProcess(ActiveTime);
+                        (int, Process) values = Levels[i].ExecuteTopProcess(RealTime);
                         ActiveTime += values.Item1;
-                        if (ArrivalList.Count !=0 && NextarrivalTime == RealTime)
-                        {   
-                                Levels[0].Processes.Enqueue(ArrivalList.Dequeue());
-                            if (ArrivalList.Count != 0)
-                            {
-                                NextarrivalTime = ArrivalList.Peek().ArrivalTime;
-                            }
+                        RealTime += values.Item1;
+                        if (ArrivalList.Count != 0 && ArrivalList.Peek().ArrivalTime <= RealTime)
+                        {
+                            Levels[0].AddProcess(ArrivalList.Dequeue());
                         }
-                        Process temp = values.Item2;
                         for (int j = Levels.Count - 1; j >= i; j--)
                         {
-
                             if (j == i)
                             {
-
                                 if (j == 0)
                                 {
-                                    if (Levels[j].Processes.Count != 0)
-                                        AddProcess(i + 1, temp);
+                                    if (Levels[j].ProcessCount() != 0)
+                                    {
+                                        AddProcess(i + 1, values.Item2);
+                                    }
                                     else
-                                        AddProcess(i, temp);
+                                    {
+                                        AddProcess(i, values.Item2);
+                                    }
                                 }
                                 else if (j == Levels.Count - 1)
                                 {
-                                    AddProcess(j, temp);
+                                    AddProcess(j, values.Item2);
                                 }
                                 else
                                 {
-                                    AddProcess(i+1, temp);
-
+                                    AddProcess(i + 1, values.Item2);
                                 }
+                                getItem = true;
                                 break;
                             }
-                            else if (Levels[j].Processes.Count != 0)
+                            else if (Levels[j].ProcessCount() != 0)
                             {
-                                AddProcess(i + 1, temp);
+                                AddProcess(i + 1, values.Item2);
+                                getItem = true;
                                 break;
                             }
                         }
+                    }
+                    if (getItem == true)
+                    {
                         break;
                     }
                 }
+                if (getItem == true)
+                {
+                    continue;
+                }
+                RealTime++;
+
             }
 
 
@@ -103,11 +110,11 @@ namespace Operating_system_task
             {
                 if (!process.IsFinished())
                 {
-                    Levels[i].Processes.Enqueue(process);
+                    Levels[i].AddProcess(process);
                 }
                 else
                 {
-                    process.Calculate(ActiveTime);
+                    process.Calculate(RealTime);
                     FinishedProcess.Enqueue(process);
                 }
             }
