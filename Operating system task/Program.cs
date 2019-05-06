@@ -19,7 +19,8 @@ namespace Operating_system_task
             //initialize process
             int TotalTime = 0,
                 ActiveTime = 0,
-                RealTime = 0;
+                RealTime = 0,
+                ActiveProcess = 0;
             Queue<Process> ArrivalList = new Queue<Process>();
             Queue<Process> FinishedProcess = new Queue<Process>();
             Console.Write("Select the number of process to perform: ");
@@ -40,6 +41,7 @@ namespace Operating_system_task
                 if (ArrivalList.Count != 0 && ArrivalList.Peek().ArrivalTime <= RealTime)
                 {
                     Levels[0].AddProcess(ArrivalList.Dequeue());
+                    ActiveProcess++;
                 }
                 for (int i = 0; i < Levels.Count; i++)
                 {
@@ -51,45 +53,26 @@ namespace Operating_system_task
                         if (ArrivalList.Count != 0 && ArrivalList.Peek().ArrivalTime <= RealTime)
                         {
                             Levels[0].AddProcess(ArrivalList.Dequeue());
+                            ActiveProcess++;
                         }
-                        for (int j = Levels.Count - 1; j >= i; j--)
+                        if(ActiveProcess == 1) {
+                            AddProcess(i, values.Item2);
+                        }
+                        else
                         {
-                            if (j == i)
+                            if (i == Levels.Count - 1)
                             {
-                                if (j == 0)
-                                {
-                                    if (Levels[j].ProcessCount() != 0)
-                                    {
-                                        AddProcess(i + 1, values.Item2);
-                                    }
-                                    else
-                                    {
-                                        AddProcess(i, values.Item2);
-                                    }
-                                }
-                                else if (j == Levels.Count - 1)
-                                {
-                                    AddProcess(j, values.Item2);
-                                }
-                                else
-                                {
-                                    AddProcess(i + 1, values.Item2);
-                                }
-                                getItem = true;
-                                break;
+                                AddProcess(i, values.Item2);
                             }
-                            else if (Levels[j].ProcessCount() != 0)
+                            else
                             {
-                                AddProcess(i + 1, values.Item2);
-                                getItem = true;
-                                break;
+                                AddProcess(i+1, values.Item2);
+
                             }
                         }
-                    }
-                    if (getItem == true)
-                    {
+                        getItem = true;
                         break;
-                    }
+                    }                    
                 }
                 if (getItem == true)
                 {
@@ -116,6 +99,7 @@ namespace Operating_system_task
                 {
                     process.Calculate(RealTime);
                     FinishedProcess.Enqueue(process);
+                    ActiveProcess--;
                 }
             }
         }
